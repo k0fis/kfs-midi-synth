@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MIDI Synth Keyboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui; background: #1a1a2e; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+h1 { margin-bottom: 8px; font-size: 1.4em; }
+#status { margin-bottom: 20px; padding: 6px 16px; border-radius: 4px; font-size: 0.9em; }
+.ok { background: #2d6a4f; }
+.err { background: #9d0208; }
+.piano { position: relative; display: flex; height: 200px; }
+.key { position: relative; border: 1px solid #333; border-radius: 0 0 4px 4px; cursor: pointer; user-select: none; transition: background 0.05s; }
+.white { width: 44px; height: 200px; background: #f8f8f8; z-index: 1; }
+.white:hover, .white.active { background: #c8e6c9; }
+.black { width: 28px; height: 125px; background: #222; margin-left: -14px; margin-right: -14px; z-index: 2; border-color: #000; }
+.black:hover, .black.active { background: #4a7c59; }
+.label { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #666; pointer-events: none; }
+.black .label { color: #aaa; bottom: 6px; }
+#info { margin-top: 16px; font-size: 0.8em; color: #888; }
+</style>
+</head>
+<body>
+<h1>MIDI Synth</h1>
+<div id="status" class="err">Connecting...</div>
+<div class="piano" id="piano"></div>
+<div id="info">Keyboard: A-L = white keys, W-P = black keys. Or click.</div>
+
+<script>
+let midiOut = null;
+const statusEl = document.getElementById('status');
+
+// Notes: 2 octaves starting from C5 (note 60)
+const START_NOTE = 60;
+const keys = [
+  {note: 60, black: false, kb: 'a'},
+  {note: 61, black: true, kb: 'w'},
+  {note: 62, black: false, kb: 's'},
+  {note: 63, black: true, kb: 'e'},
+  {note: 64, black: false, kb: 'd'},
+  {note: 65, black: false, kb: 'f'},
+  {note: 66, black: true, kb: 'r'},
+  {note: 67, black: false, kb: 'g'},
+  {note: 68, black: true, kb: 't'},
+  {note: 69, black: false, kb: 'h'},
+  {note: 70, black: true, kb: 'y'},
+  {note: 71, black: false, kb: 'j'},
+  {note: 72, black: false, kb: 'k'},
+  {note: 73, black: true, kb: 'u'},
+  {note: 74, black: false, kb: 'l'},
+  {note: 75, black: true, kb: 'i'},
+  {note: 76, black: false, kb: ';'},
+  {note: 77, black: false, kb: "'"},
+  {note: 78, black: true, kb: 'p'},
+  {note: 79, black: false, kb: '\\'},
+];
+
+const noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const pianoEl = document.getElementById('piano');
+const keyEls = {};
+const activeKeys = new Set();
+
+// Build keyboard
+keys.forEach(k => {
+  const el = document.createElement('div');
+  el.className = `key ${k.black ? 'black' : 'white'}`;
+  const label = document.createElement('span');
+  label.className = 'label';
+  label.textContent = k.kb.toUpperCase();
+  el.appendChild(label);
+  el.dataset.note = k.note;
+  pianoEl.appendChild(el);
+  keyEls[k.note] = el;
+
+  el.addEventListener('mousedown', e => { e.preventDefault(); noteOn(k.note); });
+  el.addEventListener('mouseup', () => noteOff(k.note));
+  el.addEventListener('mouseleave', () => { if (activeKeys.has(k.note)) noteOff(k.note); });
+  el.addEventListener('touchstart', e => { e.preventDefault(); noteOn(k.note); });
+  el.addEventListener('touchend', () => noteOff(k.note));
+});
+
+// Keyboard mapping
+const kbMap = {};
+keys.forEach(k => { kbMap[k.kb] = k.note; });
+
+document.addEventListener('keydown', e => {
+  if (e.repeat) return;
+  const note = kbMap[e.key.toLowerCase()];
+  if (note !== undefined) noteOn(note);
+});
+document.addEventListener('keyup', e => {
+  const note = kbMap[e.key.toLowerCase()];
+  if (note !== undefined) noteOff(note);
+});
+
+function noteOn(note) {
+  if (activeKeys.has(note)) return;
+  activeKeys.add(note);
+  keyEls[note]?.classList.add('active');
+  if (midiOut) midiOut.send([0x90, note, 100]);
+}
+
+function noteOff(note) {
+  activeKeys.delete(note);
+  keyEls[note]?.classList.remove('active');
+  if (midiOut) midiOut.send([0x80, note, 0]);
+}
+
+// Web MIDI
+async function initMidi() {
+  try {
+    const access = await navigator.requestMIDIAccess();
+    for (const output of access.outputs.values()) {
+      if (output.name.includes('MIDI Synth')) {
+        midiOut = output;
+        statusEl.textContent = 'Connected: ' + output.name;
+        statusEl.className = 'ok';
+        return;
+      }
+    }
+    statusEl.textContent = 'MIDI Synth not found — use Chrome, not Safari';
+    statusEl.className = 'err';
+  } catch (e) {
+    statusEl.textContent = 'Web MIDI not supported — use Chrome';
+    statusEl.className = 'err';
+  }
+}
+initMidi();
+</script>
+</body>
+</html>
