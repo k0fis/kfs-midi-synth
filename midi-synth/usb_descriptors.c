@@ -46,9 +46,9 @@ uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
 
 char const *string_desc_arr[] = {
     (const char[]){0x09, 0x04}, // English
-    "BlackPill Synth",          // Manufacturer
-    "MIDI Synth",               // Product
-    "000001",                   // Serial
+    "Kofis.eu Synth",           // Manufacturer
+    "KFS-MIDI Synth",           // Product
+    "C0F1-00001",               // Serial
 };
 
 static uint16_t _desc_str[32 + 1];

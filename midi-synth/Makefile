@@ -6,7 +6,7 @@ BSP = $(TOP)/hw/bsp/stm32f4
 BOARD = $(BSP)/boards/stm32f411blackpill
 ST_CMSIS = $(TOP)/hw/mcu/st/cmsis_device_f4
 ST_HAL = $(TOP)/hw/mcu/st/stm32f4xx_hal_driver
-CMSIS = $(TOP)/hw/mcu/st/CMSIS_5/CMSIS/Core
+CMSIS = $(TOP)/lib/CMSIS_5/CMSIS/Core
 
 CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
          -DSTM32F411xE -DHSE_VALUE=25000000 \

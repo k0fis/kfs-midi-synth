@@ -22,7 +22,7 @@ h1 { margin-bottom: 8px; font-size: 1.4em; }
 </style>
 </head>
 <body>
-<h1>MIDI Synth</h1>
+<h1>KFS-MIDI Synth</h1>
 <div id="status" class="err">Connecting...</div>
 <div class="piano" id="piano"></div>
 <div id="info">Keyboard: A-L = white keys, W-P = black keys. Or click.</div>
@@ -112,7 +112,7 @@ async function initMidi() {
   try {
     const access = await navigator.requestMIDIAccess();
     for (const output of access.outputs.values()) {
-      if (output.name.includes('MIDI Synth')) {
+      if (output.name.includes('KFS-MIDI Synth')) {
         midiOut = output;
         statusEl.textContent = 'Connected: ' + output.name;
         statusEl.className = 'ok';
