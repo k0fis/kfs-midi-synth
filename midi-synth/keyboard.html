@@ -19,11 +19,114 @@ h1 { margin-bottom: 8px; font-size: 1.4em; }
 .label { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #666; pointer-events: none; }
 .black .label { color: #aaa; bottom: 6px; }
 #info { margin-top: 16px; font-size: 0.8em; color: #888; }
+#waveform { margin-bottom: 12px; display: flex; gap: 8px; }
+#waveform button { padding: 8px 16px; border: 2px solid #444; border-radius: 6px; background: #2a2a3e; color: #ccc; cursor: pointer; font-size: 0.9em; transition: all 0.1s; }
+#waveform button.active { border-color: #4a7c59; background: #2d6a4f; color: #fff; }
+#presets { margin-bottom: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+#presets button { padding: 5px 12px; border: 1px solid #555; border-radius: 4px; background: #2a2a3e; color: #bbb; cursor: pointer; font-size: 0.8em; }
+#presets button:hover { background: #3a3a5e; color: #fff; }
+.fp-btn { padding: 5px 10px; border: 1px solid #555; border-radius: 4px; background: #2a2a3e; color: #bbb; cursor: pointer; font-size: 0.8em; min-width: 28px; }
+.fp-btn:hover { background: #3a3a5e; color: #fff; }
+.fp-btn.save-mode { border-color: #d44; color: #d88; }
+.param-row { margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.param-row .group-label { font-size: 0.75em; color: #666; width: 50px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; }
+.param-row label { font-size: 0.8em; color: #aaa; min-width: 42px; text-align: right; }
+.param-row input[type=range] { width: 80px; }
+.param-row span { font-size: 0.75em; color: #888; width: 32px; }
 </style>
 </head>
 <body>
 <h1>KFS-MIDI Synth</h1>
 <div id="status" class="err">Connecting...</div>
+<div id="waveform">
+  <button class="active" data-wf="0">Sine</button>
+  <button data-wf="1">Tri</button>
+  <button data-wf="2">Saw</button>
+  <button data-wf="3">Square</button>
+</div>
+<div class="param-row">
+  <span class="group-label">Morph</span>
+  <label>On</label>
+  <input type="range" class="cc-slider" data-cc="85" min="0" max="127" value="0">
+  <label>Shape</label>
+  <input type="range" class="cc-slider" data-cc="86" min="0" max="127" value="0">
+  <label>Stereo</label>
+  <input type="range" class="cc-slider" data-cc="87" min="0" max="127" value="64">
+</div>
+<div class="param-row">
+  <span class="group-label">FX</span>
+  <label>Chorus</label>
+  <input type="range" class="cc-slider" data-cc="89" min="0" max="127" value="0">
+  <label>Rate</label>
+  <input type="range" class="cc-slider" data-cc="90" min="0" max="127" value="40">
+  <label>Drive</label>
+  <input type="range" class="cc-slider" data-cc="84" min="0" max="127" value="0">
+  <label>KeyTrk</label>
+  <input type="range" class="cc-slider" data-cc="88" min="0" max="127" value="0">
+</div>
+<div id="presets"></div>
+<div id="flash-presets" style="margin-bottom: 12px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+  <span style="font-size: 0.75em; color: #666; text-transform: uppercase;">Flash:</span>
+  <button class="fp-btn" data-slot="0">1</button>
+  <button class="fp-btn" data-slot="1">2</button>
+  <button class="fp-btn" data-slot="2">3</button>
+  <button class="fp-btn" data-slot="3">4</button>
+  <button class="fp-btn" data-slot="4">5</button>
+  <button class="fp-btn" data-slot="5">6</button>
+  <button class="fp-btn" data-slot="6">7</button>
+  <button class="fp-btn" data-slot="7">8</button>
+  <button id="save-btn" style="margin-left: 10px; padding: 5px 12px; border: 1px solid #d44; border-radius: 4px; background: #2a2a3e; color: #d88; cursor: pointer; font-size: 0.8em;">Save</button>
+</div>
+<div class="param-row">
+  <span class="group-label">Mix</span>
+  <label>Volume</label>
+  <input type="range" id="volume" min="0" max="127" value="19">
+  <span id="vol-val">15%</span>
+</div>
+<div class="param-row">
+  <span class="group-label">ADSR</span>
+  <label>Atk</label>
+  <input type="range" class="cc-slider" data-cc="73" min="0" max="127" value="10">
+  <label>Dec</label>
+  <input type="range" class="cc-slider" data-cc="75" min="0" max="127" value="40">
+  <label>Sus</label>
+  <input type="range" class="cc-slider" data-cc="70" min="0" max="127" value="96">
+  <label>Rel</label>
+  <input type="range" class="cc-slider" data-cc="72" min="0" max="127" value="40">
+</div>
+<div class="param-row">
+  <span class="group-label">Filter</span>
+  <label>Cutoff</label>
+  <input type="range" class="cc-slider" data-cc="74" min="0" max="127" value="127">
+  <label>Reso</label>
+  <input type="range" class="cc-slider" data-cc="71" min="0" max="127" value="0">
+  <label>Env</label>
+  <input type="range" class="cc-slider" data-cc="80" min="0" max="127" value="0">
+  <label>Type</label>
+  <input type="range" class="cc-slider" data-cc="79" min="0" max="127" value="0">
+</div>
+<div class="param-row">
+  <span class="group-label">LFO</span>
+  <label>Rate</label>
+  <input type="range" class="cc-slider" data-cc="76" min="0" max="127" value="50">
+  <label>Depth</label>
+  <input type="range" class="cc-slider" data-cc="77" min="0" max="127" value="0">
+  <label>Trem</label>
+  <input type="range" class="cc-slider" data-cc="78" min="0" max="127" value="0">
+</div>
+<div class="param-row">
+  <span class="group-label">Extra</span>
+  <label>Detune</label>
+  <input type="range" class="cc-slider" data-cc="94" min="0" max="127" value="0">
+  <label>Glide</label>
+  <input type="range" class="cc-slider" data-cc="5" min="0" max="127" value="0">
+  <label>Sub</label>
+  <input type="range" class="cc-slider" data-cc="81" min="0" max="127" value="0">
+  <label>PW</label>
+  <input type="range" class="cc-slider" data-cc="82" min="0" max="127" value="64">
+  <label>Noise</label>
+  <input type="range" class="cc-slider" data-cc="83" min="0" max="127" value="0">
+</div>
 <div class="piano" id="piano"></div>
 <div id="info">Keyboard: A-L = white keys, W-P = black keys. Or click.</div>
 
@@ -85,13 +188,20 @@ const kbMap = {};
 keys.forEach(k => { kbMap[k.kb] = k.note; });
 
 document.addEventListener('keydown', e => {
-  if (e.repeat) return;
+  if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
   const note = kbMap[e.key.toLowerCase()];
   if (note !== undefined) noteOn(note);
 });
 document.addEventListener('keyup', e => {
   const note = kbMap[e.key.toLowerCase()];
   if (note !== undefined) noteOff(note);
+});
+
+window.addEventListener('beforeunload', () => {
+  if (midiOut) {
+    activeKeys.forEach(note => midiOut.send([0x80, note, 0]));
+    midiOut.send([0xB0, 123, 0]);  // All Notes Off
+  }
 });
 
 function noteOn(note) {
@@ -107,6 +217,106 @@ function noteOff(note) {
   if (midiOut) midiOut.send([0x80, note, 0]);
 }
 
+// Waveform selector — sends CC #1
+const wfButtons = document.querySelectorAll('#waveform button');
+const wfValues = [0, 42, 64, 127]; // sine=0, tri=42, saw=64, square=127
+wfButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    wfButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const wf = parseInt(btn.dataset.wf);
+    if (midiOut) midiOut.send([0xB0, 1, wfValues[wf]]);
+  });
+});
+
+// Volume slider — sends CC #7
+const volSlider = document.getElementById('volume');
+const volVal = document.getElementById('vol-val');
+volSlider.addEventListener('input', () => {
+  const v = parseInt(volSlider.value);
+  volVal.textContent = Math.round(v * 100 / 127) + '%';
+  if (midiOut) midiOut.send([0xB0, 7, v]);
+});
+
+// ADSR + Filter + LFO sliders — send corresponding CC
+document.querySelectorAll('.cc-slider').forEach(slider => {
+  slider.addEventListener('input', () => {
+    const cc = parseInt(slider.dataset.cc);
+    const val = parseInt(slider.value);
+    if (midiOut) midiOut.send([0xB0, cc, val]);
+  });
+});
+
+// Presets
+const presets = [
+  { name: 'Init', cc: {1:0, 7:19, 73:10, 75:40, 70:96, 72:40, 74:127, 71:0, 76:50, 77:0, 78:0, 94:0, 5:0, 79:0, 80:0, 81:0, 82:64, 83:0, 84:0, 85:0, 86:0, 87:0, 88:0, 89:0, 90:40} },
+  { name: 'Supersaw', cc: {1:64, 7:25, 73:5, 75:30, 70:100, 72:50, 74:100, 71:20, 76:50, 77:0, 78:0, 94:40, 5:0, 79:0, 80:0, 81:0, 82:64, 83:0, 84:0, 85:0, 86:0, 87:80, 88:40, 89:50, 90:40} },
+  { name: 'Bass', cc: {1:64, 7:30, 73:0, 75:20, 70:80, 72:20, 74:45, 71:60, 76:50, 77:0, 78:0, 94:10, 5:0, 79:0, 80:80, 81:60, 82:64, 83:0, 84:30, 85:0, 86:0, 87:0, 88:30, 89:0, 90:40} },
+  { name: 'Pluck', cc: {1:64, 7:30, 73:0, 75:60, 70:0, 72:30, 74:40, 71:30, 76:50, 77:0, 78:0, 94:0, 5:0, 79:0, 80:100, 81:0, 82:64, 83:0, 84:0, 85:0, 86:0, 87:40, 88:60, 89:0, 90:40} },
+  { name: 'Pad', cc: {1:0, 7:22, 73:110, 75:80, 70:90, 72:120, 74:80, 71:0, 76:40, 77:25, 78:0, 94:20, 5:0, 79:0, 80:30, 81:0, 82:64, 83:0, 84:0, 85:0, 86:0, 87:100, 88:20, 89:70, 90:30} },
+  { name: 'Organ', cc: {1:127, 7:20, 73:0, 75:0, 70:127, 72:10, 74:127, 71:0, 76:60, 77:15, 78:0, 94:0, 5:0, 79:0, 80:0, 81:40, 82:64, 83:0, 84:20, 85:0, 86:0, 87:60, 88:0, 89:40, 90:50} },
+  { name: 'Retro', cc: {1:127, 7:22, 73:5, 75:50, 70:70, 72:40, 74:60, 71:40, 76:50, 77:0, 78:0, 94:0, 5:30, 79:0, 80:0, 81:0, 82:30, 83:0, 84:0, 85:0, 86:0, 87:50, 88:0, 89:30, 90:60} },
+  { name: 'Perc', cc: {1:127, 7:25, 73:0, 75:80, 70:0, 72:20, 74:90, 71:20, 76:50, 77:0, 78:0, 94:0, 5:0, 79:0, 80:60, 81:0, 82:64, 83:50, 84:0, 85:0, 86:0, 87:30, 88:80, 89:0, 90:40} },
+  { name: 'Dirty', cc: {1:64, 7:22, 73:5, 75:40, 70:90, 72:40, 74:80, 71:40, 76:50, 77:0, 78:0, 94:20, 5:0, 79:0, 80:40, 81:30, 82:64, 83:0, 84:90, 85:0, 86:0, 87:60, 88:30, 89:30, 90:40} },
+  { name: 'Morph', cc: {1:0, 7:22, 73:10, 75:40, 70:96, 72:40, 74:100, 71:10, 76:50, 77:0, 78:0, 94:0, 5:0, 79:0, 80:0, 81:0, 82:64, 83:0, 84:0, 85:127, 86:64, 87:50, 88:40, 89:40, 90:40} },
+];
+
+const presetsEl = document.getElementById('presets');
+presets.forEach(p => {
+  const btn = document.createElement('button');
+  btn.textContent = p.name;
+  btn.addEventListener('click', () => {
+    if (!midiOut) return;
+    Object.entries(p.cc).forEach(([cc, val]) => {
+      const ccNum = parseInt(cc);
+      midiOut.send([0xB0, ccNum, val]);
+      // Update UI
+      if (ccNum === 1) {
+        wfButtons.forEach(b => b.classList.remove('active'));
+        if (val < 32) wfButtons[0].classList.add('active');
+        else if (val < 64) wfButtons[1].classList.add('active');
+        else if (val < 96) wfButtons[2].classList.add('active');
+        else wfButtons[3].classList.add('active');
+      } else if (ccNum === 7) {
+        volSlider.value = val;
+        volVal.textContent = Math.round(val * 100 / 127) + '%';
+      } else {
+        const slider = document.querySelector(`.cc-slider[data-cc="${ccNum}"]`);
+        if (slider) slider.value = val;
+      }
+    });
+  });
+  presetsEl.appendChild(btn);
+});
+
+// Flash preset slots (save/load)
+let saveMode = false;
+const saveBtn = document.getElementById('save-btn');
+const fpBtns = document.querySelectorAll('.fp-btn');
+
+saveBtn.addEventListener('click', () => {
+  saveMode = !saveMode;
+  saveBtn.style.background = saveMode ? '#5a2020' : '#2a2a3e';
+  fpBtns.forEach(b => b.classList.toggle('save-mode', saveMode));
+});
+
+fpBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!midiOut) return;
+    const slot = parseInt(btn.dataset.slot);
+    if (saveMode) {
+      // Save: send CC#0 with slot number
+      midiOut.send([0xB0, 0, slot]);
+      saveMode = false;
+      saveBtn.style.background = '#2a2a3e';
+      fpBtns.forEach(b => b.classList.remove('save-mode'));
+    } else {
+      // Load: send Program Change with slot number
+      midiOut.send([0xC0, slot]);
+    }
+  });
+});
+
 // Web MIDI
 async function initMidi() {
   try {
@@ -116,11 +326,42 @@ async function initMidi() {
         midiOut = output;
         statusEl.textContent = 'Connected: ' + output.name;
         statusEl.className = 'ok';
-        return;
+        break;
       }
     }
-    statusEl.textContent = 'MIDI Synth not found — use Chrome, not Safari';
-    statusEl.className = 'err';
+    // Listen for incoming CC (synth state dump)
+    for (const input of access.inputs.values()) {
+      if (input.name.includes('KFS-MIDI Synth')) {
+        input.onmidimessage = (e) => {
+          const [status, cc, val] = e.data;
+          if ((status & 0xF0) === 0xB0) {
+            // Update waveform buttons
+            if (cc === 1) {
+              wfButtons.forEach(b => b.classList.remove('active'));
+              if (val < 32) wfButtons[0].classList.add('active');
+              else if (val < 64) wfButtons[1].classList.add('active');
+              else if (val < 96) wfButtons[2].classList.add('active');
+              else wfButtons[3].classList.add('active');
+              return;
+            }
+            // Update volume slider
+            if (cc === 7) {
+              volSlider.value = val;
+              volVal.textContent = Math.round(val * 100 / 127) + '%';
+              return;
+            }
+            // Update CC sliders
+            const slider = document.querySelector(`.cc-slider[data-cc="${cc}"]`);
+            if (slider) slider.value = val;
+          }
+        };
+        break;
+      }
+    }
+    if (!midiOut) {
+      statusEl.textContent = 'MIDI Synth not found — use Chrome, not Safari';
+      statusEl.className = 'err';
+    }
   } catch (e) {
     statusEl.textContent = 'Web MIDI not supported — use Chrome';
     statusEl.className = 'err';
